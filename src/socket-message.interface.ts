@@ -1,7 +1,13 @@
 export enum SocketMessageCommand {
   SIGNER_CONNECT = "signer_connect",
   REQUEST_SIGNATURE = "request_signature",
+  REQUEST_SIGNATURE_RESPONSE = "request_signature_response",
   SIGN_TRANSACTION = "sign_transaction",
+  SIGN_TRANSACTION_RESPONSE = "sign_transaction_response",
+  REQUEST_LOCK = "request_lock",
+  REQUEST_LOCK_RESPONSE = "request_lock_response",
+  NOTIFY_TRANSACTION_BROADCASTED = "notify_transaction_broadcasted",
+  TRANSACTION_BROADCASTED_ACK = "transaction_broadcasted_ack",
 }
 
 export interface SocketMessage {
