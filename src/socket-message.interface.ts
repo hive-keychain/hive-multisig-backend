@@ -19,9 +19,9 @@ export interface SocketMessageType {
   type: SocketMessageCommand;
 }
 
-export interface ConnectMessage extends SocketMessageType {
+export interface SignerConnectMessage extends SocketMessageType {
   type: SocketMessageCommand.SIGNER_CONNECT;
-  publicKey: string;
+  username: string;
 }
 
 export interface RequestSignatureMessage extends SocketMessageType {

@@ -8,8 +8,15 @@ function App() {
   const [isConnected, setIsConnected] = useState(socket.connected);
   const [lastPong, setLastPong] = useState(null);
   const [socketIoId, setSocketIoId] = useState(null);
+  const [keychainDetected, setKeychainDetected] = useState(false);
+
+  const checkKeychain = () => {
+    setKeychainDetected(!!window.hive_keychain);
+  };
 
   useEffect(() => {
+    checkKeychain();
+
     socket.on("connect", () => {
       console.log("connect", socket);
       setSocketIoId(socket.id);
@@ -41,14 +48,18 @@ function App() {
     }
   };
 
+  const sendSignerConnectMessage = () => {};
+
   return (
     <div className="App">
       <div>
         <p>Connected: {"" + isConnected}</p>
         <p>Last pong: {lastPong || "-"}</p>
         <p>Socket IO id: {socketIoId || "-"}</p>
+        <p>Keychain detected: {keychainDetected}</p>
       </div>
       <button onClick={sendPing}>Send Ping</button>
+      <button onClick={sendSignerConnectMessage}>Send connect message</button>
     </div>
   );
 }

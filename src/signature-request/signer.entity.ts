@@ -1,15 +1,12 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, PrimaryColumn } from "typeorm";
 
 @Entity({ name: "signer" })
 export class Signer {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryColumn()
+  username: string;
 
   @Column()
   encryptedTransaction: string;
-
-  @Column()
-  publicKey: string;
 
   @Column()
   weight: number;

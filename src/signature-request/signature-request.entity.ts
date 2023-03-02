@@ -1,3 +1,4 @@
+import { KeychainKeyTypes } from "hive-keychain-commons";
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Signer } from "./signer.entity";
 
@@ -13,11 +14,14 @@ export class SignatureRequest {
   threshold: number;
 
   @Column()
+  keyType: KeychainKeyTypes;
+
+  @Column()
   locked: boolean;
 
   @Column()
-  answered: boolean;
+  broadcasted?: boolean;
 
-  @OneToMany(() => Signer, (signer) => signer.id)
+  @OneToMany(() => Signer, (signer) => signer.username)
   signers: Signer[];
 }

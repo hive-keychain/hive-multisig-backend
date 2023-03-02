@@ -26,6 +26,7 @@
     "hive-keychain-commons": "github:hive-keychain/hive-keychain-commons",
     "http": "0.0.0",
     "https": "^1.0.0",
+    "mysql": "^2.18.1",
     "request": "^2.88.2",
     "socket.io": "^4.5.4",
     "typeorm": "^0.3.11"
