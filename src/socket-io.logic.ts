@@ -1,6 +1,10 @@
 import { Server } from "socket.io";
 import { Config } from "./config";
-import { SocketMessageCommand } from "./socket-message.interface";
+import { SignatureRequestLogic } from "./signature-request/signature-request.logic";
+import {
+  RequestSignatureMessage,
+  SocketMessageCommand,
+} from "./socket-message.interface";
 
 interface ConnectedSigners {
   [publicKey: string]: string[];
@@ -25,9 +29,41 @@ const setup = async (httpServer: any) => {
       disconnectedSigner(socket.id);
     });
 
-    socket.on(SocketMessageCommand.SIGNER_CONNECT, (publicKeys: string[]) => {
-      registerSigner(socket.id, publicKeys);
-    });
+    socket.on(
+      SocketMessageCommand.SIGNER_CONNECT,
+      async (publicKeys: string[]) => {
+        await registerSigner(socket.id, publicKeys);
+        socket.emit(SocketMessageCommand.SIGNER_CONNECT_ACK);
+        console.log("send signer connected ack");
+      }
+    );
+
+    socket.on(
+      SocketMessageCommand.REQUEST_SIGNATURE,
+      async (message: RequestSignatureMessage) => {
+        const signatureRequest = await SignatureRequestLogic.requestSignature(
+          message.threshold,
+          message.expirationDate,
+          message.keyType,
+          message.signers
+        );
+
+        socket.emit(SocketMessageCommand.SIGN_TRANSACTION_RESPONSE, []);
+
+        for (const potentialSigner of message.signers) {
+          console.log(potentialSigner);
+          for (const socketId of connectedSigners[potentialSigner.publicKey]) {
+            console.log(socketId);
+            io.of("/")
+              .sockets.get(socketId)
+              .emit(
+                SocketMessageCommand.REQUEST_SIGN_TRANSACTION,
+                signatureRequest
+              );
+          }
+        }
+      }
+    );
   });
 
   io.listen(Config.port.socketIo);
@@ -45,7 +81,7 @@ const registerSigner = (socketId: string, publicKeys: string[]) => {
       connectedSigners[pubKey].push(socketId);
   }
 
-  console.log(connectedSigners);
+  console.log("Connected signers updated", connectedSigners);
 };
 
 const disconnectedSigner = (socketId: string) => {
@@ -57,7 +93,7 @@ const disconnectedSigner = (socketId: string) => {
       delete connectedSigners[pubKey];
     }
   }
-  console.log(connectedSigners);
+  console.log("Connected signers updated", connectedSigners);
 };
 
 export const SocketIoLogic = { setup };

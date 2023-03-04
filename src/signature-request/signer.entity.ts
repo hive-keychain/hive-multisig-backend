@@ -6,21 +6,22 @@ export class Signer {
   @PrimaryColumn()
   publicKey: string;
 
-  @Column()
+  @Column("text")
   encryptedTransaction: string;
 
   @Column()
   weight: number;
 
-  @Column()
+  @Column({ nullable: true, default: null })
   signature?: string;
 
-  @Column()
+  @Column({ nullable: true, default: false })
   refused?: boolean;
 
   @ManyToOne(
     () => SignatureRequest,
-    (signatureRequest) => signatureRequest.signers
+    (signatureRequest) => signatureRequest.signers,
+    { nullable: false }
   )
   signatureRequest: SignatureRequest;
 }

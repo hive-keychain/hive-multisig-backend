@@ -1,7 +1,11 @@
+import { KeychainKeyTypes } from "hive-keychain-commons";
+
 export enum SocketMessageCommand {
   SIGNER_CONNECT = "signer_connect",
+  SIGNER_CONNECT_ACK = "signer_connect_ack",
   REQUEST_SIGNATURE = "request_signature",
   REQUEST_SIGNATURE_RESPONSE = "request_signature_response",
+  REQUEST_SIGN_TRANSACTION = "request_sign_transaction",
   SIGN_TRANSACTION = "sign_transaction",
   SIGN_TRANSACTION_RESPONSE = "sign_transaction_response",
   REQUEST_LOCK = "request_lock",
@@ -12,30 +16,26 @@ export enum SocketMessageCommand {
 
 export interface SocketMessage {
   command: string;
-  payload: SocketMessageType;
+  payload: SocketMessagePayload;
 }
 
-export interface SocketMessageType {
-  type: SocketMessageCommand;
+export interface SocketMessagePayload {}
+
+export interface SignerConnectMessage extends SocketMessagePayload {
+  publicKey: string;
 }
 
-export interface SignerConnectMessage extends SocketMessageType {
-  type: SocketMessageCommand.SIGNER_CONNECT;
-  username: string;
-}
-
-export interface RequestSignatureMessage extends SocketMessageType {
-  type: SocketMessageCommand.REQUEST_SIGNATURE;
+export interface RequestSignatureMessage extends SocketMessagePayload {
   expirationDate: Date;
   threshold: number;
-  signers: RequestSignatureSigner;
+  keyType: KeychainKeyTypes;
+  signers: RequestSignatureSigner[];
 }
 
 export interface RequestSignatureSigner {
   encryptedTransaction: string; // Encrypted transaction with signer key
   publicKey: string;
+  weight: string;
 }
 
-export interface SignTransactionMessage extends SocketMessageType {
-  type: SocketMessageCommand.SIGN_TRANSACTION;
-}
+export interface SignTransactionMessage extends SocketMessagePayload {}
