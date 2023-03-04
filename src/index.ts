@@ -4,10 +4,10 @@ import { Express } from "express-serve-static-core";
 import Logger from "hive-keychain-commons/lib/logger/logger";
 import { createServer } from "http";
 import https from "https";
-import { Server } from "socket.io";
 import { Config } from "./config";
 import { AppDataSource } from "./database/data-source";
 import { DatabaseModule } from "./database/typeorm";
+import { SocketIoLogic } from "./socket-io.logic";
 require("dotenv").config();
 
 var cors = require("cors");
@@ -34,28 +34,7 @@ const startServer = (app: Express) => {
     });
   } else {
     const httpServer = createServer(app);
-    const io = new Server(httpServer, {
-      cors: {
-        origin: "*",
-      },
-    });
-    io.on("connection", (socket) => {
-      const values = {
-        id: socket.id,
-      };
-      console.log(values, "user connected");
-
-      socket.on("ping", (arg) => {
-        console.log("ping receive", arg);
-        socket.emit("pong", []);
-      });
-
-      socket.on("disconnect", (reason) => {
-        console.log(`disconnect ${socket.id} due to ${reason}`);
-      });
-    });
-
-    io.listen(Config.port.socketIo);
+    SocketIoLogic.setup(httpServer);
 
     httpServer.listen(Config.port.server, () => {
       Logger.technical(

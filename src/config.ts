@@ -9,7 +9,7 @@ export const Config = {
   },
   logger: {
     folder: path.join(__dirname, "..", "logs"),
-    file: "lease-market-%DATE%.log",
+    file: "multisig-%DATE%.log",
     levels: {
       TECHNICAL: 1,
       INFO: 1,

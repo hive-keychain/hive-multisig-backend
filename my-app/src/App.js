@@ -48,7 +48,9 @@ function App() {
     }
   };
 
-  const sendSignerConnectMessage = () => {};
+  const sendSignerConnectMessage = (publicKey) => {
+    socket.emit("signer_connect", [publicKey]);
+  };
 
   return (
     <div className="App">
@@ -59,7 +61,25 @@ function App() {
         <p>Keychain detected: {keychainDetected}</p>
       </div>
       <button onClick={sendPing}>Send Ping</button>
-      <button onClick={sendSignerConnectMessage}>Send connect message</button>
+      <br />
+      <button
+        onClick={() =>
+          sendSignerConnectMessage(
+            "STM7s8Ww49SwkCspGJEsq7r9jGYP9kgnmKCwhbkjSzR6wYNij9XBq"
+          )
+        }
+      >
+        Send connect message Brave
+      </button>
+      <button
+        onClick={() =>
+          sendSignerConnectMessage(
+            "STM5VJzEog2gH576KsVnjPYwLqPY6yNuNejVa5sPjaNjWd8eP3YPK"
+          )
+        }
+      >
+        Send connect message Chrome
+      </button>
     </div>
   );
 }
