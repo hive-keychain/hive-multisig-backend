@@ -22,6 +22,6 @@ export class SignatureRequest {
   @Column()
   broadcasted?: boolean;
 
-  @OneToMany(() => Signer, (signer) => signer.username)
+  @OneToMany(() => Signer, (signer) => signer.publicKey)
   signers: Signer[];
 }

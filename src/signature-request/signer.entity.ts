@@ -1,9 +1,10 @@
-import { Column, Entity, PrimaryColumn } from "typeorm";
+import { Column, Entity, ManyToOne, PrimaryColumn } from "typeorm";
+import { SignatureRequest } from "./signature-request.entity";
 
 @Entity({ name: "signer" })
 export class Signer {
   @PrimaryColumn()
-  username: string;
+  publicKey: string;
 
   @Column()
   encryptedTransaction: string;
@@ -16,4 +17,10 @@ export class Signer {
 
   @Column()
   refused?: boolean;
+
+  @ManyToOne(
+    () => SignatureRequest,
+    (signatureRequest) => signatureRequest.signers
+  )
+  signatureRequest: SignatureRequest;
 }
