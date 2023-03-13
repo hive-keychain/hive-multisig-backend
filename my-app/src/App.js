@@ -2,8 +2,6 @@ import React, { useEffect, useState } from "react";
 import { io } from "socket.io-client";
 import "./App.css";
 
-const socket = io.connect("http://localhost:5001");
-
 const cedric2PubKey = "STM7s8Ww49SwkCspGJEsq7r9jGYP9kgnmKCwhbkjSzR6wYNij9XBq";
 const cedric3PubKey = "STM5VJzEog2gH576KsVnjPYwLqPY6yNuNejVa5sPjaNjWd8eP3YPK";
 
@@ -25,17 +23,24 @@ const voteTransaction = {
   ref_block_prefix: 216731410,
 };
 
-function App() {
+const socket = io.connect("http://localhost:5001");
+
+const App = () => {
   const [isConnected, setIsConnected] = useState(socket.connected);
   const [lastPong, setLastPong] = useState(null);
   const [socketIoId, setSocketIoId] = useState(null);
   const [keychainDetected, setKeychainDetected] = useState(false);
+  const [usedPubKey, setUsedPubKey] = useState({});
+  const [signatureRequest, setSignatureRequest] = useState();
 
   const checkKeychain = () => {
+    console.log("check keychain");
     setKeychainDetected(!!window.hive_keychain);
   };
 
   useEffect(() => {
+    if (isConnected) return;
+    console.log("hello", socket.connected);
     checkKeychain();
 
     socket.on("connect", () => {
@@ -52,7 +57,8 @@ function App() {
     });
 
     socket.on("request_sign_transaction", (signatureRequest) => {
-      console.log("signature requested for", signatureRequest);
+      // console.log("signature requested for", signatureRequest, usedPubKey);
+      setSignatureRequest(signatureRequest);
     });
 
     socket.on("sign_transaction_response", () => {
@@ -62,13 +68,49 @@ function App() {
     socket.on("signer_connect_ack", () => {
       console.log("ack connected signer");
     });
-
-    return () => {
-      socket.off("connect");
-      socket.off("disconnect");
-      socket.off("pong");
-    };
   }, []);
+
+  useEffect(() => {
+    console.log("receivedSignatureRequest", signatureRequest);
+
+    if (!signatureRequest) return;
+    const signer = signatureRequest.signers.find(
+      (s) => s.publicKey === usedPubKey.key
+    );
+
+    const totalWeight = signatureRequest.signers.reduce((total, signer) => {
+      return total + signer.weight;
+    }, 0);
+    console.log(totalWeight);
+    // Lock request on backend to be able to broadcast
+
+    let shouldBroadcast = false;
+    if (totalWeight + signer.weight >= signatureRequest.threshold) {
+    }
+    window.hive_keychain.requestVerifyKey(
+      usedPubKey.username,
+      signer.encryptedTransaction,
+      signatureRequest.keyType,
+      (response) => {
+        console.log(response);
+        window.hive_keychain.requestSignTx(
+          usedPubKey.username,
+          JSON.parse(response.result.replace("#", "")),
+          signatureRequest.keyType,
+          (res) => {
+            console.log(res);
+            const signedTransaction = res.result;
+            if (shouldBroadcast) {
+              // broadcast signed transaction
+              // notifiy backend
+            } else {
+              // return signature to backend
+            }
+          }
+        );
+      }
+    );
+  }, [signatureRequest]);
 
   const sendPing = () => {
     console.log("send ping");
@@ -80,8 +122,9 @@ function App() {
     }
   };
 
-  const sendSignerConnectMessage = (publicKey) => {
+  const sendSignerConnectMessage = (username, publicKey) => {
     socket.emit("signer_connect", [publicKey]);
+    setUsedPubKey({ username: username, key: publicKey });
   };
 
   const sendRequestSignatureMessage = (encodedTransaction) => {
@@ -92,7 +135,7 @@ function App() {
       signers: [
         {
           encryptedTransaction: encodedTransaction,
-          publicKey: cedric2PubKey,
+          publicKey: cedric3PubKey,
           weight: 1,
         },
       ],
@@ -118,8 +161,6 @@ function App() {
               sendRequestSignatureMessage(res.result);
             }
           );
-
-          // send Message
         }
       }
     );
@@ -132,13 +173,18 @@ function App() {
         <p>Last pong: {lastPong || "-"}</p>
         <p>Socket IO id: {socketIoId || "-"}</p>
         <p>Keychain detected: {keychainDetected}</p>
+        <p>Using: {JSON.stringify(usedPubKey)}</p>
       </div>
       <button onClick={sendPing}>Send Ping</button>
       <br />
-      <button onClick={() => sendSignerConnectMessage(cedric2PubKey)}>
+      <button
+        onClick={() => sendSignerConnectMessage("cedric.tests2", cedric2PubKey)}
+      >
         Send connect message cedric.tests2
       </button>
-      <button onClick={() => sendSignerConnectMessage(cedric3PubKey)}>
+      <button
+        onClick={() => sendSignerConnectMessage("cedric.tests3", cedric3PubKey)}
+      >
         Send connect message cedric.tests3
       </button>
       <button onClick={() => initMultisigTransaction()}>
@@ -146,6 +192,6 @@ function App() {
       </button>
     </div>
   );
-}
+};
 
 export default App;

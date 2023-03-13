@@ -51,9 +51,9 @@ const setup = async (httpServer: any) => {
         socket.emit(SocketMessageCommand.SIGN_TRANSACTION_RESPONSE, []);
 
         for (const potentialSigner of message.signers) {
-          console.log(potentialSigner);
+          console.log(potentialSigner.publicKey);
           for (const socketId of connectedSigners[potentialSigner.publicKey]) {
-            console.log(socketId);
+            console.log(`Emit to ${socketId}`);
             io.of("/")
               .sockets.get(socketId)
               .emit(
