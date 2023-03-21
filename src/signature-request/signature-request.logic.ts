@@ -36,7 +36,22 @@ const requestLock = async (requestId: number) => {
   }
 };
 
+const retrieveAllPending = async (publicKeys: string[]) => {
+  console.log(publicKeys);
+  const allSignatureRequest = await SignatureRequestRepository.findAll();
+  const requestsToSign = [];
+  for (const request of allSignatureRequest) {
+    for (const potentialSigner of request.signers) {
+      if (publicKeys.includes(potentialSigner.publicKey)) {
+        requestsToSign.push(request);
+      }
+    }
+  }
+  return requestsToSign;
+};
+
 export const SignatureRequestLogic = {
   requestSignature,
   requestLock,
+  retrieveAllPending,
 };

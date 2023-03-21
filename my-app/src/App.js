@@ -60,14 +60,6 @@ const App = () => {
       // console.log("signature requested for", signatureRequest, usedPubKey);
       setSignatureRequest(signatureRequest);
     });
-
-    socket.on("sign_transaction_response", () => {
-      console.log("ack signature requested");
-    });
-
-    socket.on("signer_connect_ack", () => {
-      console.log("ack connected signer");
-    });
   }, []);
 
   useEffect(() => {
@@ -130,7 +122,9 @@ const App = () => {
   };
 
   const sendSignerConnectMessage = (username, publicKey) => {
-    socket.emit("signer_connect", [publicKey]);
+    socket.emit("signer_connect", [publicKey], (pendingSignatureRequests) => {
+      console.log("pending signature requests", pendingSignatureRequests);
+    });
     setUsedPubKey({ username: username, key: publicKey });
   };
 

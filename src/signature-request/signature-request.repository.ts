@@ -10,7 +10,7 @@ const getSignerRepo = () => {
 };
 
 const findAll = () => {
-  return getRepo().find();
+  return getRepo().find({ relations: ["signers"] });
 };
 
 const findById = (id: number) => {

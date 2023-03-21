@@ -31,9 +31,11 @@ const setup = async (httpServer: any) => {
 
     socket.on(
       SocketMessageCommand.SIGNER_CONNECT,
-      async (publicKeys: string[]) => {
+      async (publicKeys: string[], returnPendingSignatureRequests) => {
         await registerSigner(socket.id, publicKeys);
-        socket.emit(SocketMessageCommand.SIGNER_CONNECT_ACK);
+        const signatureRequests =
+          await SignatureRequestLogic.retrieveAllPending(publicKeys);
+        returnPendingSignatureRequests(signatureRequests);
         console.log("send signer connected ack");
       }
     );
