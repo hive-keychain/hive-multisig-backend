@@ -83,33 +83,40 @@ const App = () => {
     }, 0);
     console.log(totalWeight);
     // Lock request on backend to be able to broadcast
+    socket.emit("request_lock", signatureRequest.id, (response) => {
+      console.log(response);
+      if (response) {
+      } else {
+        console.log("already locked");
+      }
+    });
 
     let shouldBroadcast = false;
     if (totalWeight + signer.weight >= signatureRequest.threshold) {
-    }
-    window.hive_keychain.requestVerifyKey(
-      usedPubKey.username,
-      signer.encryptedTransaction,
-      signatureRequest.keyType,
-      (response) => {
-        console.log(response);
-        window.hive_keychain.requestSignTx(
-          usedPubKey.username,
-          JSON.parse(response.result.replace("#", "")),
-          signatureRequest.keyType,
-          (res) => {
-            console.log(res);
-            const signedTransaction = res.result;
-            if (shouldBroadcast) {
-              // broadcast signed transaction
-              // notifiy backend
-            } else {
-              // return signature to backend
+      window.hive_keychain.requestVerifyKey(
+        usedPubKey.username,
+        signer.encryptedTransaction,
+        signatureRequest.keyType,
+        (response) => {
+          console.log(response);
+          window.hive_keychain.requestSignTx(
+            usedPubKey.username,
+            JSON.parse(response.result.replace("#", "")),
+            signatureRequest.keyType,
+            (res) => {
+              console.log(res);
+              const signedTransaction = res.result;
+              if (shouldBroadcast) {
+                // broadcast signed transaction
+                // notifiy backend
+              } else {
+                // return signature to backend
+              }
             }
-          }
-        );
-      }
-    );
+          );
+        }
+      );
+    }
   }, [signatureRequest]);
 
   const sendPing = () => {

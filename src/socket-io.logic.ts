@@ -39,6 +39,16 @@ const setup = async (httpServer: any) => {
     );
 
     socket.on(
+      SocketMessageCommand.REQUEST_LOCK,
+      async (requestSignatureId: number, callback) => {
+        const lock = await SignatureRequestLogic.requestLock(
+          requestSignatureId
+        );
+        callback(lock);
+      }
+    );
+
+    socket.on(
       SocketMessageCommand.REQUEST_SIGNATURE,
       async (message: RequestSignatureMessage) => {
         const signatureRequest = await SignatureRequestLogic.requestSignature(
@@ -47,8 +57,6 @@ const setup = async (httpServer: any) => {
           message.keyType,
           message.signers
         );
-
-        socket.emit(SocketMessageCommand.SIGN_TRANSACTION_RESPONSE, []);
 
         for (const potentialSigner of message.signers) {
           console.log(potentialSigner.publicKey);

@@ -26,8 +26,13 @@ const create = async (signatureRequest: SignatureRequest) => {
   }
 };
 
+const update = async (signatureRequest: SignatureRequest) => {
+  await getRepo().save(signatureRequest);
+};
+
 export const SignatureRequestRepository = {
   create,
+  update,
   findById,
   findAll,
 };

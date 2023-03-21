@@ -25,6 +25,18 @@ const requestSignature = async (
   return await SignatureRequestRepository.create(signatureRequest);
 };
 
+const requestLock = async (requestId: number) => {
+  const request = await SignatureRequestRepository.findById(requestId);
+  if (request.locked) {
+    return false;
+  } else {
+    request.locked = true;
+    await SignatureRequestRepository.update(request);
+    return true;
+  }
+};
+
 export const SignatureRequestLogic = {
   requestSignature,
+  requestLock,
 };
