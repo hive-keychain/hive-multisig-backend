@@ -1,9 +1,12 @@
-import { Column, Entity, ManyToOne, PrimaryColumn } from "typeorm";
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { SignatureRequest } from "./signature-request.entity";
 
 @Entity({ name: "signer" })
 export class Signer {
-  @PrimaryColumn()
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column()
   publicKey: string;
 
   @Column("text")

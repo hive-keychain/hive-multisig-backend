@@ -5,22 +5,26 @@ import "./App.css";
 const cedric2PubKey = "STM7s8Ww49SwkCspGJEsq7r9jGYP9kgnmKCwhbkjSzR6wYNij9XBq";
 const cedric3PubKey = "STM5VJzEog2gH576KsVnjPYwLqPY6yNuNejVa5sPjaNjWd8eP3YPK";
 
-const voteTransaction = {
-  expiration: "2023-03-04T04:17:36",
-  extensions: [],
-  operations: [
-    [
-      "vote",
-      {
-        voter: "cedric.tests",
-        author: "\tcedricguillas",
-        permlink: "introducing-my-new-witness",
-        weight: 10000,
-      },
+const getVoteTransaction = () => {
+  const date = new Date();
+  date.setHours(date.getHours() + 1);
+  return {
+    expiration: date,
+    extensions: [],
+    operations: [
+      [
+        "vote",
+        {
+          voter: "cedric.tests",
+          author: "\tcedricguillas",
+          permlink: "introducing-my-new-witness",
+          weight: 10000,
+        },
+      ],
     ],
-  ],
-  ref_block_num: 64310,
-  ref_block_prefix: 216731410,
+    ref_block_num: 64310,
+    ref_block_prefix: 216731410,
+  };
 };
 
 const socket = io.connect("http://localhost:5001");
@@ -130,7 +134,7 @@ const App = () => {
 
   const sendRequestSignatureMessage = (encodedTransaction) => {
     socket.emit("request_signature", {
-      expirationDate: voteTransaction.expiration,
+      expirationDate: getVoteTransaction().expiration,
       threshold: 2,
       keyType: "Posting",
       signers: [
@@ -146,10 +150,9 @@ const App = () => {
   const initMultisigTransaction = () => {
     window.hive_keychain.requestSignTx(
       "cedric.tests",
-      voteTransaction,
+      getVoteTransaction(),
       "Posting",
       (response) => {
-        console.log(response);
         if (response.result) {
           // Retrieve other signers public key
           window.hive_keychain.requestEncodeMessage(
@@ -158,7 +161,6 @@ const App = () => {
             `#${JSON.stringify(response.result)}`,
             "Posting",
             (res) => {
-              console.log(res);
               sendRequestSignatureMessage(res.result);
             }
           );

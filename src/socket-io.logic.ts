@@ -1,8 +1,10 @@
 import { Server } from "socket.io";
 import { Config } from "./config";
+import { SignatureRequest } from "./signature-request/signature-request.entity";
 import { SignatureRequestLogic } from "./signature-request/signature-request.logic";
 import {
   RequestSignatureMessage,
+  SignTransactionMessage,
   SocketMessageCommand,
 } from "./socket-message.interface";
 
@@ -20,6 +22,7 @@ const setup = async (httpServer: any) => {
     },
   });
   io.on("connection", (socket) => {
+    // TODO: Only for dev
     socket.on("ping", (arg) => {
       socket.emit("pong", []);
     });
@@ -31,28 +34,38 @@ const setup = async (httpServer: any) => {
 
     socket.on(
       SocketMessageCommand.SIGNER_CONNECT,
-      async (publicKeys: string[], returnPendingSignatureRequests) => {
+      async (
+        publicKeys: string[],
+        returnPendingSignatureRequests: (
+          signatureRequests: SignatureRequest[]
+        ) => void
+      ) => {
         await registerSigner(socket.id, publicKeys);
         const signatureRequests =
           await SignatureRequestLogic.retrieveAllPending(publicKeys);
         returnPendingSignatureRequests(signatureRequests);
-        console.log("send signer connected ack");
       }
     );
 
     socket.on(
       SocketMessageCommand.REQUEST_LOCK,
-      async (requestSignatureId: number, callback) => {
+      async (
+        requestSignatureId: number,
+        sendIsRequestLocked: (lock: boolean) => void
+      ) => {
         const lock = await SignatureRequestLogic.requestLock(
           requestSignatureId
         );
-        callback(lock);
+        sendIsRequestLocked(lock);
       }
     );
 
     socket.on(
       SocketMessageCommand.REQUEST_SIGNATURE,
-      async (message: RequestSignatureMessage) => {
+      async (
+        message: RequestSignatureMessage,
+        sendAck: (message: string) => void
+      ) => {
         const signatureRequest = await SignatureRequestLogic.requestSignature(
           message.threshold,
           message.expirationDate,
@@ -61,7 +74,7 @@ const setup = async (httpServer: any) => {
         );
 
         for (const potentialSigner of message.signers) {
-          console.log(potentialSigner.publicKey);
+          if (!connectedSigners[potentialSigner.publicKey]) continue;
           for (const socketId of connectedSigners[potentialSigner.publicKey]) {
             console.log(`Emit to ${socketId}`);
             io.of("/")
@@ -72,6 +85,14 @@ const setup = async (httpServer: any) => {
               );
           }
         }
+        sendAck("Transaction send to potential signers");
+      }
+    );
+
+    socket.on(
+      SocketMessageCommand.SIGN_TRANSACTION,
+      async (params: SignTransactionMessage, sendResponse) => {
+        console.log(params);
       }
     );
   });
