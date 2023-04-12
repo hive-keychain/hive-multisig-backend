@@ -1,4 +1,5 @@
 import { KeychainKeyTypes } from "hive-keychain-commons";
+import { SignatureRequest } from "./signature-request/signature-request.entity";
 
 export enum SocketMessageCommand {
   SIGNER_CONNECT = "signer_connect",
@@ -18,6 +19,20 @@ export interface SocketMessagePayload {}
 
 export interface SignerConnectMessage extends SocketMessagePayload {
   publicKey: string;
+  message: string;
+  username: string;
+}
+
+export interface SignerConnectResponse {
+  errors?: SignerConnectError;
+  result?: SignerConnectResult;
+}
+
+export interface SignerConnectResult {
+  [username: string]: SignatureRequest[];
+}
+export interface SignerConnectError {
+  [username: string]: string;
 }
 
 export interface RequestSignatureMessage extends SocketMessagePayload {

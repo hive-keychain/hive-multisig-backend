@@ -1,12 +1,16 @@
 import { Server } from "socket.io";
 import { Config } from "./config";
-import { SignatureRequest } from "./signature-request/signature-request.entity";
 import { SignatureRequestLogic } from "./signature-request/signature-request.logic";
 import {
   RequestSignatureMessage,
   SignTransactionMessage,
+  SignerConnectError,
+  SignerConnectMessage,
+  SignerConnectResponse,
+  SignerConnectResult,
   SocketMessageCommand,
 } from "./socket-message.interface";
+import { AccountUtils } from "./utils/account.utils";
 
 interface ConnectedSigners {
   [publicKey: string]: string[];
@@ -35,15 +39,32 @@ const setup = async (httpServer: any) => {
     socket.on(
       SocketMessageCommand.SIGNER_CONNECT,
       async (
-        publicKeys: string[],
+        data: SignerConnectMessage[],
         returnPendingSignatureRequests: (
-          signatureRequests: SignatureRequest[]
+          response: SignerConnectResponse
         ) => void
       ) => {
-        await registerSigner(socket.id, publicKeys);
-        const signatureRequests =
-          await SignatureRequestLogic.retrieveAllPending(publicKeys);
-        returnPendingSignatureRequests(signatureRequests);
+        const result: SignerConnectResult = {};
+        let errors: SignerConnectError;
+        for (const d of data) {
+          try {
+            await AccountUtils.verifyKey(d.publicKey, d.message, d.username);
+            await registerSigner(socket.id, d.publicKey);
+            result[d.username] = await SignatureRequestLogic.retrieveAllPending(
+              d.publicKey
+            );
+          } catch (err) {
+            if (!errors) {
+              errors = {};
+            }
+            errors[d.username] = err;
+            console.log(err);
+          }
+        }
+        returnPendingSignatureRequests({
+          errors: errors,
+          result: result,
+        } as SignerConnectResponse);
       }
     );
 
@@ -100,16 +121,15 @@ const setup = async (httpServer: any) => {
   io.listen(Config.port.socketIo);
 };
 
-const registerSigner = (socketId: string, publicKeys: string[]) => {
+const registerSigner = (socketId: string, publicKeys: string) => {
   if (!connectedSigners) {
     connectedSigners = {};
   }
-  for (const pubKey of publicKeys) {
-    if (!connectedSigners[pubKey]) {
-      connectedSigners[pubKey] = [];
-    }
-    if (!connectedSigners[pubKey].includes(socketId))
-      connectedSigners[pubKey].push(socketId);
+  if (!connectedSigners[publicKeys]) {
+    connectedSigners[publicKeys] = [];
+  }
+  if (!connectedSigners[publicKeys].includes(socketId)) {
+    connectedSigners[publicKeys].push(socketId);
   }
 
   console.log("Connected signers updated", connectedSigners);

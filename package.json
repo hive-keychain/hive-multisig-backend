@@ -18,6 +18,7 @@
   "author": "keychain",
   "license": "ISC",
   "dependencies": {
+    "@hiveio/dhive": "^1.2.6",
     "@types/express": "^4.17.13",
     "body-parser": "^1.20.0",
     "cors": "^2.8.5",
