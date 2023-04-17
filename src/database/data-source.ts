@@ -4,7 +4,7 @@ import "dotenv/config";
 import "reflect-metadata";
 import { DataSource } from "typeorm";
 import { SignatureRequest } from "../signature-request/signature-request.entity";
-import { Signer } from "../signature-request/signer.entity";
+import { Signer } from "../signature-request/signer/signer.entity";
 
 export const AppDataSource = new DataSource({
   type: "mysql",

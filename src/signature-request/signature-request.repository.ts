@@ -1,12 +1,8 @@
 import { DatabaseModule } from "../database/typeorm";
 import { SignatureRequest } from "./signature-request.entity";
-import { Signer } from "./signer.entity";
 
 const getRepo = () => {
   return DatabaseModule.getDatabase().getRepository(SignatureRequest);
-};
-const getSignerRepo = () => {
-  return DatabaseModule.getDatabase().getRepository(Signer);
 };
 
 const findAll = () => {

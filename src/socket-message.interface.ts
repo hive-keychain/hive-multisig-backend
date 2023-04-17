@@ -35,11 +35,23 @@ export interface SignerConnectError {
   [username: string]: string;
 }
 
-export interface RequestSignatureMessage extends SocketMessagePayload {
+export interface ISignatureRequest {
   expirationDate: Date;
   threshold: number;
   keyType: KeychainKeyTypes;
   signers: RequestSignatureSigner[];
+}
+
+export interface SignatureRequestInitialSigner {
+  username: string;
+  publicKey: string;
+  signature: string;
+  weight: number;
+}
+
+export interface RequestSignatureMessage extends SocketMessagePayload {
+  signatureRequest: ISignatureRequest;
+  initialSigner: SignatureRequestInitialSigner;
 }
 
 export interface RequestSignatureSigner {
@@ -49,7 +61,11 @@ export interface RequestSignatureSigner {
 }
 
 export interface SignTransactionMessage extends SocketMessagePayload {
-  encryptedTransaction: string;
-  broadcasted: boolean;
-  requestSignatureId: number;
+  signature: string;
+  signerId: number;
+  signatureRequestId: number;
+}
+
+export interface RefuseTransactionMessage extends SocketMessagePayload {
+  signerId: number;
 }

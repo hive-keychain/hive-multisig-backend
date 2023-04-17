@@ -88,13 +88,14 @@ const setup = async (httpServer: any) => {
         sendAck: (message: string) => void
       ) => {
         const signatureRequest = await SignatureRequestLogic.requestSignature(
-          message.threshold,
-          message.expirationDate,
-          message.keyType,
-          message.signers
+          message.signatureRequest.threshold,
+          message.signatureRequest.expirationDate,
+          message.signatureRequest.keyType,
+          message.signatureRequest.signers,
+          message.initialSigner
         );
 
-        for (const potentialSigner of message.signers) {
+        for (const potentialSigner of message.signatureRequest.signers) {
           if (!connectedSigners[potentialSigner.publicKey]) continue;
           for (const socketId of connectedSigners[potentialSigner.publicKey]) {
             console.log(`Emit to ${socketId}`);
@@ -106,14 +107,28 @@ const setup = async (httpServer: any) => {
               );
           }
         }
-        sendAck("Transaction send to potential signers");
+        sendAck("Transaction sent to potential signers");
       }
     );
 
     socket.on(
       SocketMessageCommand.SIGN_TRANSACTION,
-      async (params: SignTransactionMessage, sendResponse) => {
-        console.log(params);
+      async (
+        params: SignTransactionMessage,
+        requestBroadcast: (signatures: string[]) => void
+      ) => {
+        console.log("params", params);
+        await SignatureRequestLogic.saveSignature(
+          params.signerId,
+          params.signature
+        );
+        const signatures =
+          await SignatureRequestLogic.getSignatureIfCanBroadcast(
+            params.signatureRequestId
+          );
+        if (signatures?.length > 0) {
+          requestBroadcast(signatures);
+        }
       }
     );
   });

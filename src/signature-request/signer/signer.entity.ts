@@ -1,5 +1,5 @@
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
-import { SignatureRequest } from "./signature-request.entity";
+import { SignatureRequest } from "../signature-request.entity";
 
 @Entity({ name: "signer" })
 export class Signer {
