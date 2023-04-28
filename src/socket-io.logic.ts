@@ -2,6 +2,7 @@ import { Server } from "socket.io";
 import { Config } from "./config";
 import { SignatureRequestLogic } from "./signature-request/signature-request.logic";
 import {
+  NotifyTxBroadcastedMessage,
   RequestSignatureMessage,
   SignTransactionMessage,
   SignerConnectError,
@@ -129,6 +130,14 @@ const setup = async (httpServer: any) => {
         if (signatures?.length > 0) {
           requestBroadcast(signatures);
         }
+      }
+    );
+
+    socket.on(
+      SocketMessageCommand.NOTIFY_TRANSACTION_BROADCASTED,
+      async (params: NotifyTxBroadcastedMessage, ack: () => void) => {
+        // should notify everyone
+        ack();
       }
     );
   });

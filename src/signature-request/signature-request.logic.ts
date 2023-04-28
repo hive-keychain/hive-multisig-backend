@@ -77,7 +77,6 @@ const getSignatureIfCanBroadcast = async (signatureRequestId: number) => {
   );
 
   let totalWeight = 0;
-
   const signatures = [];
   for (const signer of signatureRequest.signers) {
     if (signer.signature) {

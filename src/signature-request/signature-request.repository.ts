@@ -10,7 +10,7 @@ const findAll = () => {
 };
 
 const findById = (id: number) => {
-  return getRepo().findOne({ where: { id: id } });
+  return getRepo().findOne({ where: { id: id }, relations: ["signers"] });
 };
 
 const create = async (signatureRequest: SignatureRequest) => {
