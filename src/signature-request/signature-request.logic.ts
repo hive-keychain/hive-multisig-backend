@@ -2,6 +2,7 @@ import { KeychainKeyTypes } from "hive-keychain-commons";
 import {
   RequestSignatureSigner,
   SignatureRequestInitialSigner,
+  UserNotification,
 } from "../socket-message.interface";
 import { SignatureRequest } from "./signature-request.entity";
 import { SignatureRequestRepository } from "./signature-request.repository";
@@ -56,7 +57,6 @@ const requestLock = async (requestId: number) => {
 
 const retrieveAllPending = async (publicKeys: string) => {
   const allSignatureRequest = await SignatureRequestRepository.findAllPending();
-  console.log(allSignatureRequest);
   const requestsToSign: SignatureRequest[] = [];
   for (const request of allSignatureRequest) {
     for (const potentialSigner of request.signers) {
@@ -109,6 +109,23 @@ const setSignerAsNotified = async (signerId: number) => {
   await SignerRepository.setAsNotified(signerId);
 };
 
+const retrieveAllBroadcastNotification = async (
+  publicKey: string
+): Promise<UserNotification[]> => {
+  const requests = await SignatureRequestRepository.findAllBroadcasted();
+  const requestsToNotify = requests.filter((r) =>
+    r.signers.find(
+      (signer) => signer.publicKey === publicKey && !signer.notified
+    )
+  );
+
+  await SignerRepository.setAllAsNotifiedForPublicKey(publicKey);
+
+  return requestsToNotify.map((r) => {
+    return { signatureRequest: r, message: "transaction_broadcasted" };
+  });
+};
+
 export const SignatureRequestLogic = {
   requestSignature,
   requestLock,
@@ -120,4 +137,5 @@ export const SignatureRequestLogic = {
   getAllSigners,
   getById,
   setSignerAsNotified,
+  retrieveAllBroadcastNotification,
 };

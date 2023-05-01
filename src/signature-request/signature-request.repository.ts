@@ -21,6 +21,15 @@ const findAllPending = () => {
   });
 };
 
+const findAllBroadcasted = () => {
+  return getRepo().find({
+    where: {
+      broadcasted: true,
+    },
+    relations: ["signers"],
+  });
+};
+
 const findById = (id: number) => {
   return getRepo().findOne({ where: { id: id }, relations: ["signers"] });
 };
@@ -49,4 +58,5 @@ export const SignatureRequestRepository = {
   findAll,
   setAsBroadcasted,
   findAllPending,
+  findAllBroadcasted,
 };

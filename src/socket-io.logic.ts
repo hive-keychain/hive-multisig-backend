@@ -45,15 +45,21 @@ const setup = async (httpServer: any) => {
           response: SignerConnectResponse
         ) => void
       ) => {
-        const result: SignerConnectResult = {};
+        const result: SignerConnectResult = {
+          pendingSignatureRequests: {},
+          notifications: {},
+        };
         let errors: SignerConnectError;
         for (const d of data) {
           try {
             await AccountUtils.verifyKey(d.publicKey, d.message, d.username);
             await registerSigner(socket.id, d.publicKey);
-            result[d.username] = await SignatureRequestLogic.retrieveAllPending(
-              d.publicKey
-            );
+            result.pendingSignatureRequests[d.username] =
+              await SignatureRequestLogic.retrieveAllPending(d.publicKey);
+            result.notifications[d.username] =
+              await SignatureRequestLogic.retrieveAllBroadcastNotification(
+                d.publicKey
+              );
           } catch (err) {
             if (!errors) {
               errors = {};

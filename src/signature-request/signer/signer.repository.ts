@@ -17,8 +17,13 @@ const setAsNotified = async (id: number) => {
   await getRepo().update({ id: id }, { notified: true });
 };
 
+const setAllAsNotifiedForPublicKey = async (publicKey: string) => {
+  await getRepo().update({ publicKey: publicKey }, { notified: true });
+};
+
 export const SignerRepository = {
   saveSignature,
   refuseTransaction,
   setAsNotified,
+  setAllAsNotifiedForPublicKey,
 };

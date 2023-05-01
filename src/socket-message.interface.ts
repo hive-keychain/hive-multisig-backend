@@ -34,7 +34,20 @@ export interface SignerConnectResponse {
 }
 
 export interface SignerConnectResult {
+  pendingSignatureRequests?: UserPendingSignatureRequest;
+  notifications?: UserNotifications;
+}
+
+export interface UserNotifications {
+  [username: string]: UserNotification[];
+}
+export interface UserPendingSignatureRequest {
   [username: string]: SignatureRequest[];
+}
+
+export interface UserNotification {
+  message: string;
+  signatureRequest: SignatureRequest;
 }
 export interface SignerConnectError {
   [username: string]: string;
