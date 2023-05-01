@@ -8,6 +8,10 @@ import { SignatureRequestRepository } from "./signature-request.repository";
 import { Signer } from "./signer/signer.entity";
 import { SignerRepository } from "./signer/signer.repository";
 
+const getById = async (signatureRequestId: SignatureRequest["id"]) => {
+  return SignatureRequestRepository.findById(signatureRequestId);
+};
+
 const requestSignature = async (
   threshold: number,
   expirationDate: Date,
@@ -51,7 +55,8 @@ const requestLock = async (requestId: number) => {
 };
 
 const retrieveAllPending = async (publicKeys: string) => {
-  const allSignatureRequest = await SignatureRequestRepository.findAll();
+  const allSignatureRequest = await SignatureRequestRepository.findAllPending();
+  console.log(allSignatureRequest);
   const requestsToSign: SignatureRequest[] = [];
   for (const request of allSignatureRequest) {
     for (const potentialSigner of request.signers) {
@@ -89,6 +94,21 @@ const getSignatureIfCanBroadcast = async (signatureRequestId: number) => {
   }
 };
 
+const setAsBroadcasted = async (signatureRequestId: SignatureRequest["id"]) => {
+  await SignatureRequestRepository.setAsBroadcasted(signatureRequestId);
+};
+
+const getAllSigners = async (signatureRequestId: SignatureRequest["id"]) => {
+  const signatureRequest = await SignatureRequestRepository.findById(
+    signatureRequestId
+  );
+  return signatureRequest.signers.filter((signer) => !!signer.signature);
+};
+
+const setSignerAsNotified = async (signerId: number) => {
+  await SignerRepository.setAsNotified(signerId);
+};
+
 export const SignatureRequestLogic = {
   requestSignature,
   requestLock,
@@ -96,4 +116,8 @@ export const SignatureRequestLogic = {
   saveSignature,
   refuseTransaction,
   getSignatureIfCanBroadcast,
+  setAsBroadcasted,
+  getAllSigners,
+  getById,
+  setSignerAsNotified,
 };

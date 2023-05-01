@@ -118,7 +118,6 @@ const setup = async (httpServer: any) => {
         params: SignTransactionMessage,
         requestBroadcast: (signatures: string[]) => void
       ) => {
-        console.log("params", params);
         await SignatureRequestLogic.saveSignature(
           params.signerId,
           params.signature
@@ -136,7 +135,29 @@ const setup = async (httpServer: any) => {
     socket.on(
       SocketMessageCommand.NOTIFY_TRANSACTION_BROADCASTED,
       async (params: NotifyTxBroadcastedMessage, ack: () => void) => {
+        await SignatureRequestLogic.setAsBroadcasted(params.signatureRequestId);
+        const signatureRequest = await SignatureRequestLogic.getById(
+          params.signatureRequestId
+        );
         // should notify everyone
+        const signersToNotify = await SignatureRequestLogic.getAllSigners(
+          params.signatureRequestId
+        );
+        for (const signer of signersToNotify) {
+          if (!connectedSigners[signer.publicKey]) continue;
+          for (const socketId of connectedSigners[signer.publicKey]) {
+            console.log(`Emit to ${socketId}`);
+            io.of("/")
+              .sockets.get(socketId)
+              .emit(
+                SocketMessageCommand.TRANSACTION_BROADCASTED_NOTIFICATION,
+                signatureRequest.signers.find(
+                  (s) => s.publicKey === signer.publicKey
+                )
+              );
+            await SignatureRequestLogic.setSignerAsNotified(signer.id);
+          }
+        }
         ack();
       }
     );

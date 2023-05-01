@@ -21,6 +21,9 @@ export class Signer {
   @Column({ nullable: true, default: false })
   refused?: boolean;
 
+  @Column({ nullable: true, default: false })
+  notified?: boolean;
+
   @ManyToOne(
     () => SignatureRequest,
     (signatureRequest) => signatureRequest.signers,

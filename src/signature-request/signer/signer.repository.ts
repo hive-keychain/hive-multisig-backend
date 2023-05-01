@@ -13,7 +13,12 @@ const refuseTransaction = async (id: number) => {
   await getRepo().update({ id: id }, { refused: true });
 };
 
+const setAsNotified = async (id: number) => {
+  await getRepo().update({ id: id }, { notified: true });
+};
+
 export const SignerRepository = {
   saveSignature,
   refuseTransaction,
+  setAsNotified,
 };
