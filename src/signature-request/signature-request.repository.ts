@@ -1,6 +1,9 @@
-import { MoreThan } from "typeorm";
+import Logger from "hive-keychain-commons/lib/logger/logger";
+import { In, LessThan, MoreThan } from "typeorm";
+import { Config } from "../config";
 import { DatabaseModule } from "../database/typeorm";
 import { SignatureRequest } from "./signature-request.entity";
+import { SignerRepository } from "./signer/signer.repository";
 
 const getRepo = () => {
   return DatabaseModule.getDatabase().getRepository(SignatureRequest);
@@ -51,6 +54,21 @@ const setAsBroadcasted = async (signatureRequestId: SignatureRequest["id"]) => {
   await getRepo().update({ id: signatureRequestId }, { broadcasted: true });
 };
 
+const cleanAllExpired = async () => {
+  const expiredLimit = new Date();
+  expiredLimit.setDate(
+    expiredLimit.getDate() - Config.expiredRequest.cleanExpiredForXDays
+  );
+  const expiredRequests = await getRepo().find({
+    where: { expirationDate: LessThan(expiredLimit), broadcasted: false },
+  });
+  await SignerRepository.deleteAllForSignatureRequest(
+    expiredRequests.map((r) => r.id)
+  );
+  await getRepo().delete({ id: In(expiredRequests.map((r) => r.id)) });
+  Logger.technical(`${expiredRequests.length} expired requests deleted`);
+};
+
 export const SignatureRequestRepository = {
   create,
   update,
@@ -59,4 +77,5 @@ export const SignatureRequestRepository = {
   setAsBroadcasted,
   findAllPending,
   findAllBroadcasted,
+  cleanAllExpired,
 };

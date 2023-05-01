@@ -19,4 +19,8 @@ export const Config = {
       WARN: 1,
     },
   },
+  expiredRequest: {
+    cleanEveryXHours: 24,
+    cleanExpiredForXDays: 30,
+  },
 };

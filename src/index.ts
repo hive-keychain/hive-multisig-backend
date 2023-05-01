@@ -7,6 +7,7 @@ import https from "https";
 import { Config } from "./config";
 import { AppDataSource } from "./database/data-source";
 import { DatabaseModule } from "./database/typeorm";
+import { SignatureRequestLogic } from "./signature-request/signature-request.logic";
 import { SocketIoLogic } from "./socket-io.logic";
 require("dotenv").config();
 
@@ -17,7 +18,7 @@ const initServerRoutine = async () => {
   Logger.initLogger(Config.logger, process.env.NODE_ENV);
   setupRoutes(app);
   await DatabaseModule.initDatabaseConnection(AppDataSource);
-
+  await SignatureRequestLogic.initiateCleanExpiredRoutine();
   startServer(app);
 };
 

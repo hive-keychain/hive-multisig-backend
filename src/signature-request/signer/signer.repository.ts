@@ -1,4 +1,6 @@
+import { In } from "typeorm";
 import { DatabaseModule } from "../../database/typeorm";
+import { SignatureRequest } from "../signature-request.entity";
 import { Signer } from "./signer.entity";
 
 const getRepo = () => {
@@ -21,9 +23,16 @@ const setAllAsNotifiedForPublicKey = async (publicKey: string) => {
   await getRepo().update({ publicKey: publicKey }, { notified: true });
 };
 
+const deleteAllForSignatureRequest = async (
+  signatureRequestIds: SignatureRequest["id"][]
+) => {
+  await getRepo().delete({ signatureRequest: In(signatureRequestIds) });
+};
+
 export const SignerRepository = {
   saveSignature,
   refuseTransaction,
   setAsNotified,
   setAllAsNotifiedForPublicKey,
+  deleteAllForSignatureRequest,
 };

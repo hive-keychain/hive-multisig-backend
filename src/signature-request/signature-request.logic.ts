@@ -1,4 +1,5 @@
 import { KeychainKeyTypes } from "hive-keychain-commons";
+import { Config } from "../config";
 import {
   RequestSignatureSigner,
   SignatureRequestInitialSigner,
@@ -126,6 +127,13 @@ const retrieveAllBroadcastNotification = async (
   });
 };
 
+const initiateCleanExpiredRoutine = async () => {
+  SignatureRequestRepository.cleanAllExpired();
+  setInterval(() => {
+    SignatureRequestRepository.cleanAllExpired();
+  }, Config.expiredRequest.cleanEveryXHours * 60 * 60 * 1000);
+};
+
 export const SignatureRequestLogic = {
   requestSignature,
   requestLock,
@@ -138,4 +146,5 @@ export const SignatureRequestLogic = {
   getById,
   setSignerAsNotified,
   retrieveAllBroadcastNotification,
+  initiateCleanExpiredRoutine,
 };
