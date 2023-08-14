@@ -1,5 +1,12 @@
 import { KeychainKeyTypes } from "hive-keychain-commons";
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from "typeorm";
 import { Signer } from "./signer/signer.entity";
 
 @Entity({ name: "signature-request" })
@@ -24,6 +31,19 @@ export class SignatureRequest {
 
   @Column()
   broadcasted?: boolean;
+
+  @CreateDateColumn({
+    type: "timestamp",
+    default: () => "CURRENT_TIMESTAMP(6)",
+  })
+  createdAt?: Date;
+
+  @UpdateDateColumn({
+    type: "timestamp",
+    default: () => "CURRENT_TIMESTAMP(6)",
+    onUpdate: "CURRENT_TIMESTAMP(6)",
+  })
+  updatedAt?: Date;
 
   @OneToMany(() => Signer, (signer) => signer.signatureRequest, {
     cascade: true,
