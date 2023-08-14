@@ -69,6 +69,15 @@ const cleanAllExpired = async () => {
   Logger.technical(`${expiredRequests.length} expired requests deleted`);
 };
 
+const findAllForPublicKey = async (publicKey: string) => {
+  return getRepo().find({
+    where: {
+      signers: { publicKey: publicKey },
+    },
+    relations: ["signers"],
+  });
+};
+
 export const SignatureRequestRepository = {
   create,
   update,
@@ -78,4 +87,5 @@ export const SignatureRequestRepository = {
   findAllPending,
   findAllBroadcasted,
   cleanAllExpired,
+  findAllForPublicKey,
 };

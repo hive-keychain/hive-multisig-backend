@@ -134,6 +134,24 @@ const initiateCleanExpiredRoutine = async () => {
   }, Config.expiredRequest.cleanEveryXHours * 60 * 60 * 1000);
 };
 
+const getAllForPublicKey = async (publicKey: string) => {
+  const signatureRequests =
+    await SignatureRequestRepository.findAllForPublicKey(publicKey);
+
+  return signatureRequests.map((sr) => {
+    let status;
+
+    const now = new Date();
+
+    if (now > sr.expirationDate) status = "expired";
+    else if (sr.broadcasted) status = "broadcasted";
+    else if (sr.signers[0].signature && !sr.broadcasted) status = "signed";
+    else if (!sr.broadcasted && !sr.signers[0].signature) status = "pending";
+
+    return { ...sr, status };
+  });
+};
+
 export const SignatureRequestLogic = {
   requestSignature,
   requestLock,
@@ -147,4 +165,5 @@ export const SignatureRequestLogic = {
   setSignerAsNotified,
   retrieveAllBroadcastNotification,
   initiateCleanExpiredRoutine,
+  getAllForPublicKey,
 };

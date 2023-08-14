@@ -7,6 +7,7 @@ import https from "https";
 import { Config } from "./config";
 import { AppDataSource } from "./database/data-source";
 import { DatabaseModule } from "./database/typeorm";
+import { SignatureRequestApi } from "./signature-request/signature-request.api";
 import { SignatureRequestLogic } from "./signature-request/signature-request.logic";
 import { SocketIoLogic } from "./socket-io.logic";
 require("dotenv").config();
@@ -26,6 +27,7 @@ const setupRoutes = (app: Express) => {
   app.use(bodyParser.json());
   app.use(bodyParser.urlencoded({ extended: false }));
   app.use(cors());
+  SignatureRequestApi.setupApis(app);
 };
 
 const startServer = (app: Express) => {
