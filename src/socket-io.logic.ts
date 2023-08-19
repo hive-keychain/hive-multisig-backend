@@ -155,12 +155,12 @@ const setup = async (httpServer: any) => {
             console.log(`Emit to ${socketId}`);
             io.of("/")
               .sockets.get(socketId)
-              .emit(
-                SocketMessageCommand.TRANSACTION_BROADCASTED_NOTIFICATION,
-                signatureRequest.signers.find(
+              .emit(SocketMessageCommand.TRANSACTION_BROADCASTED_NOTIFICATION, {
+                ...signatureRequest,
+                signers: signatureRequest.signers.find(
                   (s) => s.publicKey === signer.publicKey
-                )
-              );
+                ),
+              });
             await SignatureRequestLogic.setSignerAsNotified(signer.id);
           }
         }
