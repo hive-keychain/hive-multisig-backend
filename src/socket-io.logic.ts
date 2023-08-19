@@ -52,6 +52,7 @@ const setup = async (httpServer: any) => {
         let errors: SignerConnectError;
         for (const d of data) {
           try {
+            console.log(d.publicKey, d.message, d.username);
             await AccountUtils.verifyKey(d.publicKey, d.message, d.username);
             await registerSigner(socket.id, d.publicKey);
             result.pendingSignatureRequests[d.username] =
