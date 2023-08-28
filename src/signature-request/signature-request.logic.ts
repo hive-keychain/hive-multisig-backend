@@ -37,6 +37,7 @@ const requestSignature = async (
     threshold: threshold,
     keyType: keyType,
     initiator: initialSigner.username,
+    initiatorPublicKey: initialSigner.publicKey,
     locked: false,
     broadcasted: false,
     signers: signersList,

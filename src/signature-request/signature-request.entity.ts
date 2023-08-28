@@ -27,6 +27,9 @@ export class SignatureRequest {
   initiator: string;
 
   @Column()
+  initiatorPublicKey: string;
+
+  @Column()
   locked: boolean;
 
   @Column()
