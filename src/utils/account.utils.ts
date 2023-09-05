@@ -16,8 +16,11 @@ const verifyKey = async (
     const result = key.verify(cryptoUtils.sha256(username), signature);
     if (result) {
       return true;
-    } else throw new Error("The signature could not be verified");
-  } else throw new Error("The signature could not be verified");
+    } else {
+      console.log("The signature could not be verified1");
+    }
+  } else console.log("The signature could not be verified");
+  return false;
 };
 
 export const AccountUtils = {
