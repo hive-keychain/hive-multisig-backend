@@ -4,8 +4,8 @@ require("dotenv").config();
 
 export const Config = {
   port: {
-    server: 5000,
-    socketIo: 5001,
+    server: process.env.PORT || 5000,
+    socketIo: process.env.SOCKET_PORT || 5001,
   },
   logger: {
     folder: path.join(__dirname, "..", "logs"),
