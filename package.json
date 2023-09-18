@@ -6,7 +6,7 @@
   "scripts": {
     "start": "ts-node src/index.ts",
     "dev": "nodemon src/index.ts",
-    "pm2-start": "pm2 start --name keychain-api npm -- start",
+    "pm2-start": "pm2 start --name multisig-backend npm -- start",
     "pm2-stop": "pm2 kill",
     "build": "tsc -p ."
   },
