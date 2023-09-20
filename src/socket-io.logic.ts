@@ -20,7 +20,11 @@ let io;
 let connectedSigners: ConnectedSigners = {};
 
 const setup = (httpServer: any) => {
-  io = new Server(httpServer);
+  io = new Server(httpServer, {
+    cors: {
+      origin: "*",
+    },
+  });
   io.on("connection", (socket) => {
     // TODO: Only for dev
     socket.on("ping", (arg) => {
