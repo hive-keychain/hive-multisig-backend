@@ -5,22 +5,26 @@ import { SignatureRequestLogic } from "./signature-request.logic";
 
 const setupGetAllForUsername = (app: Express) => {
   app.get(`/signature-request/all`, async (req, res) => {
-    const publicKey = req.query.publicKey as string;
-    const encodedMessage = req.headers.message as string;
-    console.log(req.headers);
-    console.log(req.header("message"));
+    try {
+      const publicKey = req.query.publicKey as string;
+      const encodedMessage = req.headers.message as string;
+      console.log(req.headers);
+      console.log(req.header("message"));
 
-    const result = await HiveUtils.getClient().keys.getKeyReferences([
-      publicKey!,
-    ]);
-    const username = result.accounts[0][0];
-    if (AccountUtils.verifyKey(publicKey, encodedMessage, username))
-      res.send(
-        await SignatureRequestLogic.getAllForPublicKey(
-          req.query.publicKey as string
-        )
-      );
-    else res.status(401).send("You cannot access this data");
+      const result = await HiveUtils.getClient().keys.getKeyReferences([
+        publicKey!,
+      ]);
+      const username = result.accounts[0][0];
+      if (AccountUtils.verifyKey(publicKey, encodedMessage, username))
+        res.send(
+          await SignatureRequestLogic.getAllForPublicKey(
+            req.query.publicKey as string
+          )
+        );
+      else res.status(401).send("You cannot access this data");
+    } catch (e) {
+      res.status(401).send("You cannot access this data");
+    }
   });
 };
 

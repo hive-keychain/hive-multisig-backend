@@ -1,5 +1,4 @@
 import { Server } from "socket.io";
-import { Config } from "./config";
 import { SignatureRequestLogic } from "./signature-request/signature-request.logic";
 import {
   NotifyTxBroadcastedMessage,
@@ -20,12 +19,8 @@ interface ConnectedSigners {
 let io;
 let connectedSigners: ConnectedSigners = {};
 
-const setup = async (httpServer: any) => {
-  io = new Server(httpServer, {
-    cors: {
-      origin: "*",
-    },
-  });
+const setup = (httpServer: any) => {
+  io = new Server(httpServer);
   io.on("connection", (socket) => {
     // TODO: Only for dev
     socket.on("ping", (arg) => {
@@ -170,7 +165,7 @@ const setup = async (httpServer: any) => {
     );
   });
 
-  io.listen(Config.port.socketIo);
+  // io.listen(Config.port.socketIo);
 };
 
 const registerSigner = (socketId: string, publicKeys: string) => {
