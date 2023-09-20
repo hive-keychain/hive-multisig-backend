@@ -26,6 +26,10 @@ const setupGetAllForUsername = (app: Express) => {
       res.status(401).send("You cannot access this data");
     }
   });
+
+  app.get("/health", (req, res) => {
+    res.status(200).send();
+  });
 };
 
 const setupApis = (app: Express) => {
