@@ -51,7 +51,6 @@ const setup = (httpServer: any) => {
         let errors: SignerConnectError;
         for (const d of data) {
           try {
-            console.log(d.publicKey, d.message, d.username);
             await AccountUtils.verifyKey(d.publicKey, d.message, d.username);
             await registerSigner(socket.id, d.publicKey);
             result.pendingSignatureRequests[d.username] =
@@ -64,7 +63,7 @@ const setup = (httpServer: any) => {
             if (!errors) {
               errors = {};
             }
-            errors[d.username] = err;
+            errors[d.publicKey] = err;
             console.log(err);
           }
         }
@@ -94,6 +93,7 @@ const setup = (httpServer: any) => {
         message: RequestSignatureMessage,
         sendAck: (message: string) => void
       ) => {
+        console.log(message);
         const signatureRequest = await SignatureRequestLogic.requestSignature(
           message.signatureRequest.threshold,
           message.signatureRequest.expirationDate,
@@ -108,10 +108,10 @@ const setup = (httpServer: any) => {
             console.log(`Emit to ${socketId}`);
             io.of("/")
               .sockets.get(socketId)
-              .emit(
-                SocketMessageCommand.REQUEST_SIGN_TRANSACTION,
-                signatureRequest
-              );
+              .emit(SocketMessageCommand.REQUEST_SIGN_TRANSACTION, {
+                ...signatureRequest,
+                targetedPublicKey: potentialSigner.publicKey,
+              });
           }
         }
         sendAck("Transaction sent to potential signers");

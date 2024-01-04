@@ -58,6 +58,7 @@ export interface ISignatureRequest {
   threshold: number;
   keyType: KeychainKeyTypes;
   signers: RequestSignatureSigner[];
+  targetedPublicKey: string;
 }
 
 export interface SignatureRequestInitialSigner {
