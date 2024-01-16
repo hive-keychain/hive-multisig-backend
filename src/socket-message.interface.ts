@@ -3,6 +3,7 @@ import { SignatureRequest } from "./signature-request/signature-request.entity";
 
 export enum SocketMessageCommand {
   SIGNER_CONNECT = "signer_connect",
+  SIGNER_DISCONNECT = "signer_disconnect",
   REQUEST_SIGNATURE = "request_signature",
   REQUEST_SIGN_TRANSACTION = "request_sign_transaction",
   SIGN_TRANSACTION = "sign_transaction",

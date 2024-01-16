@@ -6,7 +6,6 @@ const verifyKey = async (
   message: string,
   username: string
 ) => {
-  console.log(`trying`, publicKey, message, username);
   const accounts = (
     await HiveUtils.getClient().keys.getKeyReferences([publicKey!])
   )?.accounts;

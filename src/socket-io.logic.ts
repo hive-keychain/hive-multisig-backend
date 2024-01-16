@@ -1,3 +1,4 @@
+import Logger from "hive-keychain-commons/lib/logger/logger";
 import { Server } from "socket.io";
 import { SignatureRequestLogic } from "./signature-request/signature-request.logic";
 import {
@@ -71,6 +72,15 @@ const setup = (httpServer: any) => {
           errors: errors,
           result: result,
         } as SignerConnectResponse);
+      }
+    );
+
+    socket.on(
+      SocketMessageCommand.SIGNER_DISCONNECT,
+      async (publicKey: string) => {
+        Logger.info(`Disconnecting ${publicKey}`);
+        delete connectedSigners[publicKey];
+        console.log(connectedSigners);
       }
     );
 
