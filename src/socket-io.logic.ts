@@ -159,18 +159,26 @@ const setup = (httpServer: any) => {
         const signersToNotify = await SignatureRequestLogic.getAllSigners(
           params.signatureRequestId
         );
+        const notifiedSockets = [];
         for (const signer of signersToNotify) {
           if (!connectedSigners[signer.publicKey]) continue;
           for (const socketId of connectedSigners[signer.publicKey]) {
-            console.log(`Emit to ${socketId}`);
-            io.of("/")
-              .sockets.get(socketId)
-              .emit(SocketMessageCommand.TRANSACTION_BROADCASTED_NOTIFICATION, {
-                ...signatureRequest,
-                signers: signatureRequest.signers.find(
-                  (s) => s.publicKey === signer.publicKey
-                ),
-              });
+            Logger.info(`Emit to ${socketId}`);
+            if (!notifiedSockets.includes(socketId)) {
+              io.of("/")
+                .sockets.get(socketId)
+                .emit(
+                  SocketMessageCommand.TRANSACTION_BROADCASTED_NOTIFICATION,
+                  {
+                    ...signatureRequest,
+                    signers: signatureRequest.signers.find(
+                      (s) => s.publicKey === signer.publicKey
+                    ),
+                  },
+                  params.txId
+                );
+              notifiedSockets.push(socketId);
+            }
             await SignatureRequestLogic.setSignerAsNotified(signer.id);
           }
         }
@@ -193,7 +201,7 @@ const registerSigner = (socketId: string, publicKeys: string) => {
     connectedSigners[publicKeys].push(socketId);
   }
 
-  console.log("Connected signers updated", connectedSigners);
+  // console.log("Connected signers updated", connectedSigners);
 };
 
 const disconnectedSigner = (socketId: string) => {
@@ -205,7 +213,7 @@ const disconnectedSigner = (socketId: string) => {
       delete connectedSigners[pubKey];
     }
   }
-  console.log("Connected signers updated", connectedSigners);
+  // console.log("Connected signers updated", connectedSigners);
 };
 
 export const SocketIoLogic = { setup };

@@ -21,6 +21,7 @@ export interface SocketMessagePayload {}
 
 export interface NotifyTxBroadcastedMessage extends SocketMessagePayload {
   signatureRequestId: number;
+  txId: string;
 }
 
 export interface SignerConnectMessage extends SocketMessagePayload {
