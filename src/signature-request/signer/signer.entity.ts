@@ -13,6 +13,9 @@ export class Signer {
   encryptedTransaction: string;
 
   @Column()
+  twoFACode?: string;
+
+  @Column()
   weight: number;
 
   @Column({ nullable: true, default: null })

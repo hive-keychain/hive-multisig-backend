@@ -4,11 +4,15 @@
   "description": "Backend for Hive Multisig",
   "main": "index.js",
   "scripts": {
-    "start": "ts-node src/index.ts",
-    "dev": "nodemon src/index.ts",
+    "start": "npm run typeorm:run-migrations && ts-node src/index.ts",
+    "dev": "npm run typeorm:run-migrations && nodemon src/index.ts",
     "pm2-start": "pm2 start --name multisig-backend npm -- start",
     "pm2-stop": "pm2 kill",
-    "build": "tsc -p ."
+    "build": "tsc -p .",
+    "typeorm": "typeorm-ts-node-commonjs",
+    "typeorm:run-migrations": "npm run typeorm migration:run -- -d ./src/database/data-source.ts",
+    "typeorm:generate-migration": "npm run typeorm -- -d ./src/database/data-source.ts migration:generate ./src/database/migrations/$npm_config_name",
+    "typeorm:create-migration": "npm run typeorm -- migration:create ./src/database/migrations/$npm_config_name"
   },
   "keywords": [
     "hive",
