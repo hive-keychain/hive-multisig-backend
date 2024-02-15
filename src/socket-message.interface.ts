@@ -79,6 +79,7 @@ export interface RequestSignatureSigner {
   encryptedTransaction: string; // Encrypted transaction with signer key
   publicKey: string;
   weight: string;
+  twoFACode?: string;
 }
 
 export interface SignTransactionMessage extends SocketMessagePayload {
