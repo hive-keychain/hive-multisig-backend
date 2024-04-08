@@ -79,6 +79,10 @@ export interface RequestSignatureSigner {
   encryptedTransaction: string; // Encrypted transaction with signer key
   publicKey: string;
   weight: string;
+  metaData?: RequestSignatureSignerMetadata;
+}
+
+export interface RequestSignatureSignerMetadata {
   twoFACode?: string;
 }
 
