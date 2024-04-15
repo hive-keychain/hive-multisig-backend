@@ -12,8 +12,8 @@ export class Signer {
   @Column("text")
   encryptedTransaction: string;
 
-  @Column()
-  twoFACode?: string;
+  @Column("simple-json")
+  metaData?: any;
 
   @Column()
   weight: number;
