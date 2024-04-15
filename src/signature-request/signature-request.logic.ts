@@ -22,6 +22,7 @@ const requestSignature = async (
   initialSigner: SignatureRequestInitialSigner
 ) => {
   const signersList: Signer[] = signers.map((s) => {
+    console.log(s);
     return { ...s, signature: null, refused: false } as unknown as Signer;
   });
   signersList.push({

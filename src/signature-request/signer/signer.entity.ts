@@ -12,7 +12,7 @@ export class Signer {
   @Column("text")
   encryptedTransaction: string;
 
-  @Column()
+  @Column("simple-json")
   metaData?: string;
 
   @Column()
