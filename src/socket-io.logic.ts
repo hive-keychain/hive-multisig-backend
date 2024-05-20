@@ -2,7 +2,9 @@ import Logger from "hive-keychain-commons/lib/logger/logger";
 import { Server } from "socket.io";
 import { SignatureRequestLogic } from "./signature-request/signature-request.logic";
 import {
+  MultisigErrorMessage,
   NotifyTxBroadcastedMessage,
+  NotifyTxErrorMessage,
   RequestSignatureMessage,
   SignTransactionMessage,
   SignerConnectError,
@@ -12,6 +14,7 @@ import {
   SocketMessageCommand,
 } from "./socket-message.interface";
 import { AccountUtils } from "./utils/account.utils";
+import { HiveUtils } from "./utils/hive.utils";
 
 interface ConnectedSigners {
   [publicKey: string]: string[];
@@ -103,7 +106,6 @@ const setup = (httpServer: any) => {
         message: RequestSignatureMessage,
         sendAck: (message: string) => void
       ) => {
-        console.log(message);
         const signatureRequest = await SignatureRequestLogic.requestSignature(
           message.signatureRequest.threshold,
           message.signatureRequest.expirationDate,
@@ -185,12 +187,50 @@ const setup = (httpServer: any) => {
         ack();
       }
     );
+
+    socket.on(
+      SocketMessageCommand.SEND_BACK_ERROR,
+      async (message: MultisigErrorMessage) => {
+        console.log(message);
+
+        const signatureRequest = await SignatureRequestLogic.getById(
+          message.signatureRequestId
+        );
+
+        // should notify everyone
+        const signersToNotify = await SignatureRequestLogic.getAllSigners(
+          message.signatureRequestId
+        );
+        const notifiedSockets = [];
+        for (const signer of signersToNotify) {
+          if (!connectedSigners[signer.publicKey]) continue;
+          for (const socketId of connectedSigners[signer.publicKey]) {
+            Logger.info(`Emit to ${socketId}`);
+            if (!notifiedSockets.includes(socketId)) {
+              io.of("/")
+                .sockets.get(socketId)
+                .emit(SocketMessageCommand.TRANSACTION_ERROR_NOTIFICATION, {
+                  signatureRequest: {
+                    ...signatureRequest,
+                    signers: signatureRequest.signers.find(
+                      (s) => s.publicKey === signer.publicKey
+                    ),
+                  },
+                  error: message.error,
+                } as unknown as NotifyTxErrorMessage);
+              notifiedSockets.push(socketId);
+            }
+            await SignatureRequestLogic.setSignerAsNotified(signer.id);
+          }
+        }
+      }
+    );
   });
 
   // io.listen(Config.port.socketIo);
 };
 
-const registerSigner = (socketId: string, publicKeys: string) => {
+const registerSigner = async (socketId: string, publicKeys: string) => {
   if (!connectedSigners) {
     connectedSigners = {};
   }
@@ -200,6 +240,10 @@ const registerSigner = (socketId: string, publicKeys: string) => {
   if (!connectedSigners[publicKeys].includes(socketId)) {
     connectedSigners[publicKeys].push(socketId);
   }
+
+  console.log(
+    await HiveUtils.getClient().keys.getKeyReferences([publicKeys.toString()])
+  );
 
   // console.log("Connected signers updated", connectedSigners);
 };

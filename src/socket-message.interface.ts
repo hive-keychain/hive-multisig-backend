@@ -10,6 +10,8 @@ export enum SocketMessageCommand {
   REQUEST_LOCK = "request_lock",
   NOTIFY_TRANSACTION_BROADCASTED = "notify_transaction_broadcasted",
   TRANSACTION_BROADCASTED_NOTIFICATION = "transaction_broadcasted_notification",
+  TRANSACTION_ERROR_NOTIFICATION = "transaction_error_notification",
+  SEND_BACK_ERROR = "send_back_error",
 }
 
 export interface SocketMessage {
@@ -19,6 +21,21 @@ export interface SocketMessage {
 
 export interface SocketMessagePayload {}
 
+export interface MultisigErrorMessage extends SocketMessagePayload {
+  signatureRequestId: number;
+  error: {
+    fullMessage: string;
+    message: string;
+  };
+}
+
+export interface NotifyTxErrorMessage extends SocketMessagePayload {
+  signatureRequest: SignatureRequest;
+  error: {
+    fullMessage: string;
+    message: string;
+  };
+}
 export interface NotifyTxBroadcastedMessage extends SocketMessagePayload {
   signatureRequestId: number;
   txId: string;
