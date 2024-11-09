@@ -23,4 +23,7 @@ export const Config = {
     cleanEveryXHours: 24,
     cleanExpiredForXDays: 30,
   },
+  sync: {
+    seed: ["http://localhost:5005"],
+  },
 };

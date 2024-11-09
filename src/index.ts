@@ -7,6 +7,7 @@ import https from "https";
 import { Config } from "./config";
 import { AppDataSource } from "./database/data-source";
 import { DatabaseModule } from "./database/typeorm";
+import { ServerSyncLogic } from "./servers-sync/server-sync.logic";
 import { SignatureRequestApi } from "./signature-request/signature-request.api";
 import { SignatureRequestLogic } from "./signature-request/signature-request.logic";
 import { SocketIoLogic } from "./socket-io.logic";
@@ -38,6 +39,7 @@ const startServer = (app: Express) => {
   } else {
     const httpServer = createServer(app);
     SocketIoLogic.setup(httpServer);
+    ServerSyncLogic.initSync(httpServer);
 
     httpServer.listen(Config.port.server, () => {
       Logger.technical(
